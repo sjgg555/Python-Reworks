@@ -141,8 +141,9 @@ def main():
                 new_particle.fix_location()
         data_grid.set_val(new_particle.location, count)
         print(f"Finished {i + 1}, loops: {count}")
-    output_name = f"time_data_{max_particles}_{BOUNDS.get_vals()}"
-    Image.fromarray(data_grid.data).save(output_name + ".bmp")
+    output_name = f"time_data_{max_particles}_{BOUNDS.get_vals()}.bmp"
+    full_path = os.path.join(os.path.dirname(__file__), output_name)
+    Image.fromarray(data_grid.data).save(full_path)
 
 
 if __name__ == "__main__":
