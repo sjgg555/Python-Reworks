@@ -14,9 +14,7 @@ def main():
     df_extra = pd.read_csv(r"extra_data.csv")
     df_header = df_original.loc[:5, :]
     df_body = df_original.loc[6:, :].astype(float)
-    df_tip_centres = df_body[list('abc')]
-    df_tip_centres += df_extra.loc[0]
-    df_body[list('abc')] = df_tip_centres
+    df_body[list('abc')] += df_extra.loc[0]
     df_result = df_header.append(df_body)
     df_result.to_csv("output.csv", header=False, index=False, float_format='%.6f')
 
