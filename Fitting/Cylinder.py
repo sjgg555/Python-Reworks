@@ -57,7 +57,32 @@ def create_spiral(centre, start_angle, end_angle, radius, length, revolutions, p
     z_coords = centre[2] + lengths
     
     return np.array([x_coords, y_coords, z_coords])
+
+
+class shape_factory():
     
+    def __init__(self, step_func=None, path_func=None, sweep_func=None):        
+        self.step_generator = self.default_step() if step_func is None else step_func
+        self.sweep_generator = self.default_sweep() if sweep_func is None else sweep_func
+        self.path_generator = self.default_path() if path_func is None else path_func
+        
+    class default_path():        
+        def __call__(self, coords):
+            return coords
+        
+    class default_sweep():        
+        def __call__(self, steps):
+            return np.array([np.array([0.,i,0.]) for i in steps]).T
+        
+    class default_step():
+        def __call__(self, step_count):
+            return np.linspace(0, step_count)
+        
+    def generate(self, point_count):
+        steps = np.linspace(0, point_count)
+        sweep_coords = self.sweep_generator(steps)
+        return self.path_generator(sweep_coords)
+        
 
 def main():
     # circle
@@ -70,7 +95,7 @@ def main():
     rotation_angle = 10
     coords = create_circle(centre, start, end, radius, point_count)
     coords = rotate(coords, normal, rotation_angle)
-    plot_points(*coords)
+    #plot_points(*coords)
     
     # spiral
     start = 0
@@ -85,8 +110,19 @@ def main():
     rotation_angle = 10
     coords = create_spiral(centre, start, end, radius, length, revolutions, points_per_rev)
     coords = rotate(coords, normal, rotation_angle)
-    plot_points(*coords)
-
+    #plot_points(*coords)
+    
+    def test_path(coords):
+        x_coords = np.cos(coords[0])
+        y_coords = np.sin(coords[1])
+        z_coords = coords[2]
+        
+        return np.array([x_coords, y_coords, z_coords])
+    
+    test = shape_factory()
+    test.path_generator = test_path
+    points = test.generate(50)
+    plot_points(*points)
 
 if __name__ == "__main__":
     main()
