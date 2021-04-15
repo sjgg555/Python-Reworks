@@ -10,7 +10,7 @@ from PIL import Image
 import os
 import math
 import numpy as np
-import generate_sdf as sdf
+import snowy
 
 
 def display_input_image(sender, data):
@@ -26,26 +26,32 @@ def display_input_image(sender, data):
         
     display_output_sdf(file_path)
     
+
 def display_output_sdf(file_path):
     """Takes an input image and outputs an sdf image,"""
-    img = sdf.generate_sdf(Image.open(file_path).convert("LA"))
-    
-    dpg_image = []
-    for i in range(0, img.height):
-        for j in range(0, img.width):
-            pixel = img.getpixel((j, i))
-            dpg_image.append(pixel)
-            dpg_image.append(pixel)
-            dpg_image.append(pixel)
-            dpg_image.append(255)
-            
+    image = Image.open(file_path).convert("L")
+    img = np.expand_dims(np.array(image), axis=2)
+    stage_1 = snowy.generate_udf(img != 0)
+    udf = snowy.unitize(stage_1)
+
+    output_data = []
+    for x in udf:
+        for i in x:
+            val = i[0] * 255
+            output_data.append(val)
+            output_data.append(val)
+            output_data.append(val)
+            output_data.append(255)
+
+    output_data = np.array(output_data)
+
     with simple.window("Output Image", width=320, height=340):
         simple.set_window_pos("Output Image", 530, 300)
         
         #create a drawing to display the image
         core.add_drawing('##drawing_2', width=300, height=300)
         #create a texture to hold the image data
-        core.add_texture("##texture", dpg_image, width=img.width, height=img.height)
+        core.add_texture("##texture", output_data, width=image.width, height=image.height)
         #draw the image data to the drawing
         core.draw_image("##drawing_2", "##texture", pmin=[0,0], pmax=[300, 300])
 
@@ -55,7 +61,7 @@ def pick_file(sender, data):
 
 
 def main():
-    with simple.window("File", width=400, height=200):
+    with simple.window("File", width=500, height=300):
         simple.set_window_pos("File", 300, 20)
         core.add_text("High Res-ify")
         core.add_text("File Path: ")
